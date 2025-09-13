@@ -17,6 +17,7 @@ namespace Recruitment_Process_Management_System.Extensions
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ICandidateRepository, CandidateRepository>();
             services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
 
             // Register services
             services.AddScoped<AuthService>();

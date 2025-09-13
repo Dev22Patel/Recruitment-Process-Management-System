@@ -16,17 +16,21 @@ namespace Recruitment_Process_Management_System.Services
         private readonly ICandidateRepository _candidateRepository;
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IConfiguration _configuration;
+        private readonly IRoleRepository _roleRepository;
 
         public AuthService(
             IUserRepository userRepository,
             ICandidateRepository candidateRepository,
             IUserRoleRepository userRoleRepository,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IRoleRepository roleRepository
+            )
         {
             _userRepository = userRepository;
             _candidateRepository = candidateRepository;
             _userRoleRepository = userRoleRepository;
             _configuration = configuration;
+            _roleRepository = roleRepository;
         }
 
         public async Task<(bool Success, string Message, Guid? UserId)> RegisterAsync(RegisterRequest request)
@@ -70,8 +74,21 @@ namespace Recruitment_Process_Management_System.Services
 
                 await _candidateRepository.CreateAsync(candidate);
 
-                // Skip role assignment for candidates (as discussed)
-                // Only assign roles for Employee users
+                var CandidateRole = await _roleRepository.GetByNameAsync("Candidate");
+
+                if (CandidateRole == null)
+                {
+                    return (false, "Candidate role not found", null);
+                }
+
+                var userRole = new UserRole
+                {
+                    UserId = createdUser.Id,
+                    RoleId = CandidateRole.Id, 
+                    AssignedAt = DateTime.UtcNow
+                };
+
+                await _userRoleRepository.CreateAsync(userRole);
 
                 return (true, "Registration successful", createdUser.Id);
             }
