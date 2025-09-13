@@ -45,6 +45,13 @@ namespace Recruitment_Process_Management_System.Services
 
                 // Hash password
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+                
+                //get candidate ROLE
+                var CandidateRole = await _roleRepository.GetByNameAsync("Candidate");
+                if (CandidateRole == null)
+                {
+                    return (false, "Candidate role not found", null);
+                }
 
                 // Create user with GUID
                 var user = new User
@@ -55,7 +62,7 @@ namespace Recruitment_Process_Management_System.Services
                     Email = request.Email.ToLower().Trim(),
                     PhoneNumber = request.PhoneNumber,
                     PasswordHash = passwordHash,
-                    UserType = "Candidate", // Now this property exists
+                    UserType = CandidateRole.RoleName,
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
                 };
@@ -66,20 +73,13 @@ namespace Recruitment_Process_Management_System.Services
                 var candidate = new Candidate
                 {
                     Id = Guid.NewGuid(),
-                    UserId = createdUser.Id, // Now both are Guid
+                    UserId = createdUser.Id, 
                     Source = "Manual Entry",
                     IsProfileCompleted = false,
                     CreatedAt = DateTime.UtcNow
                 };
 
                 await _candidateRepository.CreateAsync(candidate);
-
-                var CandidateRole = await _roleRepository.GetByNameAsync("Candidate");
-
-                if (CandidateRole == null)
-                {
-                    return (false, "Candidate role not found", null);
-                }
 
                 var userRole = new UserRole
                 {
