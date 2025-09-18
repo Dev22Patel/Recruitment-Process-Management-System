@@ -27,5 +27,13 @@ namespace Recruitment_Process_Management_System.Repositories.Implementations
                 .Include(c => c.User)
                 .FirstOrDefaultAsync(c => c.UserId == userId);
         }
+
+        public bool IsProfileComplete(Candidate candidate)
+        {
+            var temp = _context.Candidates.FirstOrDefault(c => c.Id == candidate.Id);
+            if (temp == null) return false;
+
+            return temp.IsProfileCompleted;
+        }
     }
 }

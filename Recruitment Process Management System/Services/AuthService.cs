@@ -23,8 +23,7 @@ namespace Recruitment_Process_Management_System.Services
             ICandidateRepository candidateRepository,
             IUserRoleRepository userRoleRepository,
             IConfiguration configuration,
-            IRoleRepository roleRepository
-            )
+            IRoleRepository roleRepository)
         {
             _userRepository = userRepository;
             _candidateRepository = candidateRepository;

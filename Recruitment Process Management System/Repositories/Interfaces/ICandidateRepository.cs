@@ -6,5 +6,7 @@ namespace Recruitment_Process_Management_System.Repositories.Interfaces
     {
         Task<Candidate> CreateAsync(Candidate candidate);
         Task<Candidate?> GetByUserIdAsync(Guid userId);
+
+        bool IsProfileComplete(Candidate candidate); 
     }
 }

@@ -2,7 +2,7 @@
 {
     public class LoginResponse
     {
-        public string UserId { get; set; } // FIXED: Changed to string to handle Guid
+        public string UserId { get; set; } 
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
