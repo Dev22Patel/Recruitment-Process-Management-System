@@ -68,11 +68,12 @@ namespace Recruitment_Process_Management_System.Services
 
                 var createdUser = await _userRepository.CreateAsync(user);
 
-                // Create candidate profile with matching GUID
+                // In RegisterAsync, set the required 'User' property when creating the Candidate object
                 var candidate = new Candidate
                 {
                     Id = Guid.NewGuid(),
-                    UserId = createdUser.Id, 
+                    UserId = createdUser.Id,
+                    User = createdUser, // Set the required User property
                     Source = "Manual Entry",
                     IsProfileCompleted = false,
                     CreatedAt = DateTime.UtcNow

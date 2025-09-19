@@ -28,6 +28,20 @@ namespace Recruitment_Process_Management_System.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Skills",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
+                    SkillName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Skills", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -103,6 +117,39 @@ namespace Recruitment_Process_Management_System.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "CandidateSkills",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
+                    CandidateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SkillId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    YearsOfExperience = table.Column<decimal>(type: "decimal(3,1)", nullable: true),
+                    VerifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CandidateSkills", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CandidateSkills_Candidates_CandidateId",
+                        column: x => x.CandidateId,
+                        principalTable: "Candidates",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CandidateSkills_Skills_SkillId",
+                        column: x => x.SkillId,
+                        principalTable: "Skills",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CandidateSkills_Users_VerifiedBy",
+                        column: x => x.VerifiedBy,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.InsertData(
                 table: "Roles",
                 columns: new[] { "Id", "IsActive", "RoleName" },
@@ -120,6 +167,28 @@ namespace Recruitment_Process_Management_System.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CandidateSkills_CandidateId_SkillId",
+                table: "CandidateSkills",
+                columns: new[] { "CandidateId", "SkillId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CandidateSkills_SkillId",
+                table: "CandidateSkills",
+                column: "SkillId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CandidateSkills_VerifiedBy",
+                table: "CandidateSkills",
+                column: "VerifiedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Skills_SkillName",
+                table: "Skills",
+                column: "SkillName",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_RoleId",
                 table: "UserRoles",
                 column: "RoleId");
@@ -135,10 +204,16 @@ namespace Recruitment_Process_Management_System.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Candidates");
+                name: "CandidateSkills");
 
             migrationBuilder.DropTable(
                 name: "UserRoles");
+
+            migrationBuilder.DropTable(
+                name: "Candidates");
+
+            migrationBuilder.DropTable(
+                name: "Skills");
 
             migrationBuilder.DropTable(
                 name: "Roles");

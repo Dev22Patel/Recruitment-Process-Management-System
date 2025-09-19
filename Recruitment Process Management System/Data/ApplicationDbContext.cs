@@ -11,6 +11,8 @@ namespace Recruitment_Process_Management_System.Data
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<Candidate> Candidates { get; set; }
+        public DbSet<Skill> Skills { get; set; }
+        public DbSet<CandidateSkill> CandidateSkills { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -94,6 +96,46 @@ namespace Recruitment_Process_Management_System.Data
                 entity.Property(e => e.GraduationYear).IsRequired(false);
                 entity.Property(e => e.Degree).IsRequired(false);
                 entity.Property(e => e.ResumeFilePath).IsRequired(false);
+            });
+
+            // Skill configuration
+            modelBuilder.Entity<Skill>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id)
+                      .HasColumnType("uniqueidentifier")
+                      .HasDefaultValueSql("NEWID()");
+
+                entity.HasIndex(e => e.SkillName).IsUnique();
+            });
+
+            // CandidateSkill configuration - THIS FIXES THE CASCADE DELETE CONFLICT
+            modelBuilder.Entity<CandidateSkill>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id)
+                      .HasColumnType("uniqueidentifier")
+                      .HasDefaultValueSql("NEWID()");
+
+                entity.Property(e => e.CandidateId)
+                      .HasColumnType("uniqueidentifier");
+                entity.Property(e => e.SkillId)
+                      .HasColumnType("uniqueidentifier");
+
+
+                // Unique constraint - one candidate can't have duplicate skills
+                entity.HasIndex(e => new { e.CandidateId, e.SkillId })
+                      .IsUnique();
+
+                entity.HasOne(cs => cs.Candidate)
+                      .WithMany(c => c.CandidateSkills)
+                      .HasForeignKey(cs => cs.CandidateId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(cs => cs.Skill)
+                      .WithMany(s => s.CandidateSkills)
+                      .HasForeignKey(cs => cs.SkillId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             // Seed default roles

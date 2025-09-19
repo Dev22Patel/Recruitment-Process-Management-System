@@ -46,6 +46,10 @@ namespace Recruitment_Process_Management_System.Models.Entities
 
         // Navigation property
         [ForeignKey("UserId")]
-        public virtual User User { get; set; }
+        public required User User { get; set; }
+
+
+        // Many-to-many relationship with Skills through CandidateSkill
+        public ICollection<CandidateSkill> CandidateSkills { get; set; } = new List<CandidateSkill>();
     }
 }

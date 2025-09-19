@@ -12,7 +12,7 @@ using Recruitment_Process_Management_System.Data;
 namespace Recruitment_Process_Management_System.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250913112505_InitialCreate")]
+    [Migration("20250918145712_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -87,6 +87,40 @@ namespace Recruitment_Process_Management_System.Migrations
                     b.ToTable("Candidates");
                 });
 
+            modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.CandidateSkill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<Guid>("CandidateId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("SkillId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("VerifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("YearsOfExperience")
+                        .HasColumnType("decimal(3,1)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SkillId");
+
+                    b.HasIndex("VerifiedBy");
+
+                    b.HasIndex("CandidateId", "SkillId")
+                        .IsUnique();
+
+                    b.ToTable("CandidateSkills");
+                });
+
             modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -132,6 +166,34 @@ namespace Recruitment_Process_Management_System.Migrations
                             IsActive = true,
                             RoleName = "Candidate"
                         });
+                });
+
+            modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.Skill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SkillName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SkillName")
+                        .IsUnique();
+
+                    b.ToTable("Skills");
                 });
 
             modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.User", b =>
@@ -215,6 +277,31 @@ namespace Recruitment_Process_Management_System.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.CandidateSkill", b =>
+                {
+                    b.HasOne("Recruitment_Process_Management_System.Models.Entities.Candidate", "Candidate")
+                        .WithMany("CandidateSkills")
+                        .HasForeignKey("CandidateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Recruitment_Process_Management_System.Models.Entities.Skill", "Skill")
+                        .WithMany("CandidateSkills")
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Recruitment_Process_Management_System.Models.Entities.User", "VerifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("VerifiedBy");
+
+                    b.Navigation("Candidate");
+
+                    b.Navigation("Skill");
+
+                    b.Navigation("VerifiedByUser");
+                });
+
             modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.UserRole", b =>
                 {
                     b.HasOne("Recruitment_Process_Management_System.Models.Entities.Role", "Role")
@@ -234,9 +321,19 @@ namespace Recruitment_Process_Management_System.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.Candidate", b =>
+                {
+                    b.Navigation("CandidateSkills");
+                });
+
             modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.Role", b =>
                 {
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.Skill", b =>
+                {
+                    b.Navigation("CandidateSkills");
                 });
 
             modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.User", b =>
