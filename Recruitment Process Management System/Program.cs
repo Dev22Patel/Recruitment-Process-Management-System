@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Recruitment_Process_Management_System.Data;
 using Recruitment_Process_Management_System.Extensions;
 using System.Text;
@@ -48,6 +49,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
+    builder.Services.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Recruitment API", Version = "v1" });
+
+        // Custom Schema ID generation to avoid conflicts
+        c.CustomSchemaIds(type =>
+        {
+            if (type.Namespace != null && type.Namespace.Contains("DTOs"))
+                return type.Name + "Dto";
+            if (type.Namespace != null && type.Namespace.Contains("Entities"))
+                return type.Name + "Entity";
+            return type.Name;
+        });
+    });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -56,6 +73,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
 
 app.UseHttpsRedirection();
 

@@ -14,33 +14,33 @@ namespace Recruitment_Process_Management_System.Repositories.Implementations
             _context = context;
         }
 
-        public async Task<bool> UpdateCandidateSkillsAsync(Guid candidateId, List<CandidateSkill> skills)
-        {
-            try
-            {
-                // Remove existing skills
-                var existingSkills = await _context.CandidateSkills
-                    .Where(cs => cs.CandidateId == candidateId)
-                    .ToListAsync();
+        //public async Task<bool> UpdateCandidateSkillsAsync(Guid candidateId, List<CandidateSkill> skills)
+        //{
+        //    try
+        //    {
+        //        // Remove existing skills
+        //        var existingSkills = await _context.CandidateSkills
+        //            .Where(cs => cs.CandidateId == candidateId)
+        //            .ToListAsync();
 
-                if (existingSkills.Any())
-                {
-                    _context.CandidateSkills.RemoveRange(existingSkills);
-                }
+        //        if (existingSkills.Any())
+        //        {
+        //            _context.CandidateSkills.RemoveRange(existingSkills);
+        //        }
 
-                // Add new skills
-                if (skills.Any())
-                {
-                    await _context.CandidateSkills.AddRangeAsync(skills);
-                }
+        //        // Add new skills
+        //        if (skills.Any())
+        //        {
+        //            await _context.CandidateSkills.AddRangeAsync(skills);
+        //        }
 
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
+        //        await _context.SaveChangesAsync();
+        //        return true;
+        //    }
+        //    catch
+        //    {
+        //        return false;
+        //    }
+        //}
     }
 }

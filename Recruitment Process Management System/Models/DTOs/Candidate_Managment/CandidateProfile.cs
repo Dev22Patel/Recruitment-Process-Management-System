@@ -10,7 +10,6 @@
         public decimal? CurrentSalary { get; set; }
         public decimal? ExpectedSalary { get; set; }
         public int? NoticePeriod { get; set; }
-        public string? Source { get; set; }
         public string? CollegeName { get; set; }
         public int? GraduationYear { get; set; }
         public string? Degree { get; set; }

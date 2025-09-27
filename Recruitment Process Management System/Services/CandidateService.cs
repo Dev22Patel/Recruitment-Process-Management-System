@@ -30,7 +30,6 @@ namespace Recruitment_Process_Management_System.Services
             candidate.CurrentSalary = updateDto.CurrentSalary;
             candidate.ExpectedSalary = updateDto.ExpectedSalary;
             candidate.NoticePeriod = updateDto.NoticePeriod;
-            candidate.Source = updateDto.Source ?? candidate.Source;
             candidate.CollegeName = updateDto.CollegeName;
             candidate.GraduationYear = updateDto.GraduationYear;
             candidate.Degree = updateDto.Degree;
@@ -74,7 +73,6 @@ namespace Recruitment_Process_Management_System.Services
                 CurrentSalary = candidate.CurrentSalary,
                 ExpectedSalary = candidate.ExpectedSalary,
                 NoticePeriod = candidate.NoticePeriod,
-                Source = candidate.Source,
                 CollegeName = candidate.CollegeName,
                 GraduationYear = candidate.GraduationYear,
                 Degree = candidate.Degree,

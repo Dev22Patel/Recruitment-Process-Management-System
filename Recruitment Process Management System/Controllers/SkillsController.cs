@@ -1,11 +1,141 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Recruitment_Process_Management_System.Models.Entities;
+using Recruitment_Process_Management_System.Services;
 
 namespace Recruitment_Process_Management_System.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SkillsController : ControllerBase
+    public class SkillController : ControllerBase
     {
+        private readonly SkillService _skillService;
+
+        public SkillController(SkillService skillService)
+        {
+            _skillService = skillService ?? throw new ArgumentNullException(nameof(skillService));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateSkill([FromBody] Skill skill)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var createdSkill = await _skillService.CreateSkillAsync(skill);
+                return CreatedAtAction(nameof(GetSkillById), new { id = createdSkill.Id }, createdSkill);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Error creating skill.", Error = ex.Message });
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetSkillById(Guid id)
+        {
+            try
+            {
+                var skill = await _skillService.GetSkillByIdAsync(id);
+                if (skill == null)
+                {
+                    return NotFound(new { Message = "Skill not found." });
+                }
+                return Ok(skill);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Error retrieving skill.", Error = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllSkills()
+        {
+            try
+            {
+                var skills = await _skillService.GetAllSkillsAsync();
+                return Ok(skills);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Error retrieving skills.", Error = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateSkill(Guid id, [FromBody] Skill skill)
+        {
+            try
+            {
+                if (!ModelState.IsValid || skill.Id != id)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var updatedSkill = await _skillService.UpdateSkillAsync(skill);
+                return Ok(updatedSkill);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(new { Message = "Skill not found." });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Error updating skill.", Error = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteSkill(Guid id)
+        {
+            try
+            {
+                var success = await _skillService.DeleteSkillAsync(id);
+                if (!success)
+                {
+                    return NotFound(new { Message = "Skill not found." });
+                }
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Error deleting skill.", Error = ex.Message });
+            }
+        }
+
+        [HttpPatch("{id}/deactivate")]
+        public async Task<IActionResult> DeactivateSkill(Guid id)
+        {
+            try
+            {
+                var success = await _skillService.DeactivateSkillAsync(id);
+                if (!success)
+                {
+                    return NotFound(new { Message = "Skill not found." });
+                }
+                return Ok(new { Message = "Skill deactivated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Error deactivating skill.", Error = ex.Message });
+            }
+        }
     }
 }

@@ -22,9 +22,6 @@ namespace Recruitment_Process_Management_System.Models.DTOs.Candidate_Managment
         [Range(0, 365)]
         public int? NoticePeriod { get; set; }
 
-        [MaxLength(50)]
-        public string? Source { get; set; }
-
         [MaxLength(200)]
         public string? CollegeName { get; set; }
 
