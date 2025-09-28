@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using RabbitMQ.Client;
 using Recruitment_Process_Management_System.Data;
 using Recruitment_Process_Management_System.Extensions;
 using System.Text;
@@ -65,6 +66,27 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         });
     });
 
+builder.Services.AddSingleton<IConnectionFactory>(sp =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    return new ConnectionFactory
+    {
+        HostName = configuration["RabbitMQ:HostName"],
+        UserName = configuration["RabbitMQ:UserName"],
+        Password = configuration["RabbitMQ:Password"],
+        Port = int.Parse(configuration["RabbitMQ:Port"]),
+        VirtualHost = configuration["RabbitMQ:VirtualHost"],
+        AutomaticRecoveryEnabled = true,
+        NetworkRecoveryInterval = TimeSpan.FromSeconds(int.Parse(configuration["RabbitMQ:NetworkRecoveryIntervalSeconds"])),
+        RequestedConnectionTimeout = TimeSpan.FromSeconds(int.Parse(configuration["RabbitMQ:RequestedConnectionTimeoutSeconds"])),
+        SocketReadTimeout = TimeSpan.FromSeconds(int.Parse(configuration["RabbitMQ:SocketReadTimeoutSeconds"])),
+        SocketWriteTimeout = TimeSpan.FromSeconds(int.Parse(configuration["RabbitMQ:SocketWriteTimeoutSeconds"])),
+        ContinuationTimeout = TimeSpan.FromSeconds(int.Parse(configuration["RabbitMQ:ContinuationTimeoutSeconds"])),
+        TopologyRecoveryEnabled = true,
+        ClientProvidedName = "RecruitmentProcessManagementSystem"
+    };
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -72,6 +94,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseDeveloperExceptionPage();
+
 }
 
 

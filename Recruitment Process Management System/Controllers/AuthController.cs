@@ -9,10 +9,12 @@ namespace Recruitment_Process_Management_System.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AuthService _authService;
+        private readonly EmailService _emailService;
 
-        public AuthController(AuthService authService)
+        public AuthController(AuthService authService,EmailService emailService)
         {
             _authService = authService;
+            _emailService = emailService;
         }
 
         [HttpPost("register")]
@@ -29,6 +31,7 @@ namespace Recruitment_Process_Management_System.Controllers
             {
                 return BadRequest(new { Message = message });
             }
+
 
             return Ok(new
             {

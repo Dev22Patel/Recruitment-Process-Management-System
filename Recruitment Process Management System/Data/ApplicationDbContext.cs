@@ -14,6 +14,7 @@ namespace Recruitment_Process_Management_System.Data
         public DbSet<Skill> Skills { get; set; }
         public DbSet<CandidateSkill> CandidateSkills { get; set; }
 
+        public DbSet<Notification> Notifications { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

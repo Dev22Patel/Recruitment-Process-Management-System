@@ -17,19 +17,23 @@ namespace Recruitment_Process_Management_System.Services
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IConfiguration _configuration;
         private readonly IRoleRepository _roleRepository;
+        private readonly EmailService _emailService;
 
         public AuthService(
             IUserRepository userRepository,
             ICandidateRepository candidateRepository,
             IUserRoleRepository userRoleRepository,
             IConfiguration configuration,
-            IRoleRepository roleRepository)
+            IRoleRepository roleRepository,
+            EmailService emailService
+            ) 
         {
             _userRepository = userRepository;
             _candidateRepository = candidateRepository;
             _userRoleRepository = userRoleRepository;
             _configuration = configuration;
             _roleRepository = roleRepository;
+            _emailService = emailService; 
         }
 
         public async Task<(bool Success, string Message, Guid? UserId)> RegisterAsync(RegisterRequest request)
@@ -45,7 +49,7 @@ namespace Recruitment_Process_Management_System.Services
                 // Hash password
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
                 
-                //get candidate ROLE
+                // Get candidate ROLE
                 var CandidateRole = await _roleRepository.GetByNameAsync("Candidate");
                 if (CandidateRole == null)
                 {
@@ -89,6 +93,9 @@ namespace Recruitment_Process_Management_System.Services
                 };
 
                 await _userRoleRepository.CreateAsync(userRole);
+
+                await _emailService.SendEmailAsync(createdUser.Email, "Welcome To Recruitment System",
+                    $"Thank you for registering, {createdUser.FirstName}. Your account is now active.");
 
                 return (true, "Registration successful", createdUser.Id);
             }
@@ -141,6 +148,7 @@ namespace Recruitment_Process_Management_System.Services
                     Token = token,
                     ExpiresAt = DateTime.UtcNow.AddDays(1)
                 };
+
 
                 return (true, "Login successful", response);
             }
