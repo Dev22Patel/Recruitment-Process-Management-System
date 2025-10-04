@@ -16,6 +16,8 @@ namespace Recruitment_Process_Management_System.Repositories.Implementations
         public async Task<Notification> AddNotificationAsync(Notification notification)
         {
             _context.Notifications.Add(notification);
+            Console.WriteLine("Added notification to context.");
+            Console.WriteLine($"Notification Details: UserId={notification.UserId}, Title={notification.Title}, Message={notification.Message}");
             await _context.SaveChangesAsync();
             return notification;
         }

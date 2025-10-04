@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Recruitment_Process_Management_System.Data;
 
@@ -11,9 +12,11 @@ using Recruitment_Process_Management_System.Data;
 namespace Recruitment_Process_Management_System.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251004065356_AddNotificationTables")]
+    partial class AddNotificationTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -113,97 +116,6 @@ namespace Recruitment_Process_Management_System.Migrations
                     b.ToTable("CandidateSkills");
                 });
 
-            modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.JobPosition", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CreatorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Department")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EmploymentType")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ExperienceLevel")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Location")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("MaxExperience")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("MinExperience")
-                        .HasColumnType("int");
-
-                    b.Property<decimal?>("Salary")
-                        .HasColumnType("decimal(12,2)");
-
-                    b.Property<int>("StatusId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("StatusReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatorId");
-
-                    b.HasIndex("StatusId");
-
-                    b.ToTable("JobPositions");
-                });
-
-            modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.JobSkillRequirement", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsRequired")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("JobPositionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("MinYearsExperience")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("SkillId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("JobPositionId");
-
-                    b.HasIndex("SkillId");
-
-                    b.ToTable("JobSkillRequirements");
-                });
-
             modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.Notification", b =>
                 {
                     b.Property<Guid>("Id")
@@ -286,12 +198,6 @@ namespace Recruitment_Process_Management_System.Migrations
                             Id = 4,
                             IsActive = true,
                             RoleName = "Candidate"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            IsActive = true,
-                            RoleName = "Recruiter"
                         });
                 });
 
@@ -321,90 +227,6 @@ namespace Recruitment_Process_Management_System.Migrations
                         .IsUnique();
 
                     b.ToTable("Skills");
-                });
-
-            modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.Status", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("EntityType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("StatusName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Statuses");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            EntityType = "JobPosition",
-                            IsActive = true,
-                            StatusName = "Open"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            EntityType = "JobPosition",
-                            IsActive = true,
-                            StatusName = "On Hold"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            EntityType = "JobPosition",
-                            IsActive = true,
-                            StatusName = "Closed"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            EntityType = "Application",
-                            IsActive = true,
-                            StatusName = "Applied"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            EntityType = "Application",
-                            IsActive = true,
-                            StatusName = "Screening"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            EntityType = "Application",
-                            IsActive = true,
-                            StatusName = "Interview"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            EntityType = "Application",
-                            IsActive = true,
-                            StatusName = "Selected"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            EntityType = "Application",
-                            IsActive = true,
-                            StatusName = "Rejected"
-                        });
                 });
 
             modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.User", b =>
@@ -507,42 +329,6 @@ namespace Recruitment_Process_Management_System.Migrations
                     b.Navigation("Skill");
                 });
 
-            modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.JobPosition", b =>
-                {
-                    b.HasOne("Recruitment_Process_Management_System.Models.Entities.User", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatorId");
-
-                    b.HasOne("Recruitment_Process_Management_System.Models.Entities.Status", "Status")
-                        .WithMany()
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Creator");
-
-                    b.Navigation("Status");
-                });
-
-            modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.JobSkillRequirement", b =>
-                {
-                    b.HasOne("Recruitment_Process_Management_System.Models.Entities.JobPosition", "JobPosition")
-                        .WithMany("JobSkillRequirements")
-                        .HasForeignKey("JobPositionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Recruitment_Process_Management_System.Models.Entities.Skill", "Skill")
-                        .WithMany()
-                        .HasForeignKey("SkillId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("JobPosition");
-
-                    b.Navigation("Skill");
-                });
-
             modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.UserRole", b =>
                 {
                     b.HasOne("Recruitment_Process_Management_System.Models.Entities.Role", "Role")
@@ -565,11 +351,6 @@ namespace Recruitment_Process_Management_System.Migrations
             modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.Candidate", b =>
                 {
                     b.Navigation("CandidateSkills");
-                });
-
-            modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.JobPosition", b =>
-                {
-                    b.Navigation("JobSkillRequirements");
                 });
 
             modelBuilder.Entity("Recruitment_Process_Management_System.Models.Entities.Role", b =>

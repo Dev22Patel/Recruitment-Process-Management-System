@@ -26,13 +26,14 @@ namespace Recruitment_Process_Management_System.Extensions
             services.AddScoped<ICandidateService, CandidateService>();
             services.AddScoped<ISkillRepository, SkillRepository>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
-
+            services.AddScoped<IJobPositionRepository, JobPositionRepository>();
 
             // Register services with their interfaces
             services.AddScoped<SkillService>();
             services.AddScoped<AuthService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<EmailService>();
+            services.AddScoped<JobPositionService>();
 
             return services;
         }

@@ -15,6 +15,15 @@ namespace Recruitment_Process_Management_System.Data
         public DbSet<CandidateSkill> CandidateSkills { get; set; }
 
         public DbSet<Notification> Notifications { get; set; }
+
+
+
+        // Job Position related
+        public DbSet<JobPosition> JobPositions { get; set; }
+        public DbSet<JobSkillRequirement> JobSkillRequirements { get; set; }
+        //public DbSet<JobPositionReviewer> JobPositionReviewers { get; set; }
+        public DbSet<Status> Statuses { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -144,7 +153,19 @@ namespace Recruitment_Process_Management_System.Data
                 new Role { Id = 1, RoleName = "Admin", IsActive = true },
                 new Role { Id = 2, RoleName = "HR", IsActive = true },
                 new Role { Id = 3, RoleName = "Interviewer", IsActive = true },
-                new Role { Id = 4, RoleName = "Candidate", IsActive = true }
+                new Role { Id = 4, RoleName = "Candidate", IsActive = true },
+                new Role { Id = 5, RoleName = "Recruiter", IsActive = true }
+            );
+
+            modelBuilder.Entity<Status>().HasData(
+                new Status { Id = 1, EntityType = "JobPosition", StatusName = "Open", IsActive = true },
+                new Status { Id = 2, EntityType = "JobPosition", StatusName = "On Hold", IsActive = true },
+                new Status { Id = 3, EntityType = "JobPosition", StatusName = "Closed", IsActive = true },
+                new Status { Id = 4, EntityType = "Application", StatusName = "Applied", IsActive = true },
+                new Status { Id = 5, EntityType = "Application", StatusName = "Screening", IsActive = true },
+                new Status { Id = 6, EntityType = "Application", StatusName = "Interview", IsActive = true },
+                new Status { Id = 7, EntityType = "Application", StatusName = "Selected", IsActive = true },
+                new Status { Id = 8, EntityType = "Application", StatusName = "Rejected", IsActive = true }
             );
         }
     }
