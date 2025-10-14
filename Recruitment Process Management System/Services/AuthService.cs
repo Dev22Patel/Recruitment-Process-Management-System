@@ -94,8 +94,8 @@ namespace Recruitment_Process_Management_System.Services
 
                 await _userRoleRepository.CreateAsync(userRole);
 
-                await _emailService.SendEmailAsync(createdUser.Email, "Welcome To Recruitment System",
-                    $"Thank you for registering, {createdUser.FirstName}. Your account is now active.");
+                await _emailService.QueueEmailAsync(createdUser.Email, "Welcome To Recruitment System",
+                                    $"Thank you for registering, {createdUser.FirstName}. Your account is now active.");
 
                 return (true, "Registration successful", createdUser.Id);
             }
@@ -149,6 +149,8 @@ namespace Recruitment_Process_Management_System.Services
                     ExpiresAt = DateTime.UtcNow.AddDays(1)
                 };
 
+                await _emailService.QueueEmailAsync(user.Email, "Login Notification",
+                                    $"Hello {user.FirstName}, you have successfully logged in on {DateTime.UtcNow} UTC.");
 
                 return (true, "Login successful", response);
             }

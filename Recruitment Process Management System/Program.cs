@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -5,9 +6,59 @@ using Microsoft.OpenApi.Models;
 using RabbitMQ.Client;
 using Recruitment_Process_Management_System.Data;
 using Recruitment_Process_Management_System.Extensions;
+using Recruitment_Process_Management_System.Services.Consumers;
+using Recruitment_Process_Management_System.Services.RabbitMq;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var rabbitMqConfig = builder.Configuration.GetSection("RabbitMq").Get<RabbitMqConfig>();
+
+
+builder.Services.AddSingleton<IConnectionFactory>(sp =>
+{
+    return new ConnectionFactory
+    {
+        HostName = rabbitMqConfig.Host,
+        Port = rabbitMqConfig.Port,
+        UserName = rabbitMqConfig.Username,
+        Password = rabbitMqConfig.Password,
+        VirtualHost = "/"
+    };
+});
+
+builder.Services.AddMassTransit(x =>
+{
+    // Register the email consumer
+    x.AddConsumer<SendEmailConsumer>();
+
+    // Configure RabbitMQ transport
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        // Use URI-based host configuration with port
+        cfg.Host($"rabbitmq://{rabbitMqConfig.Host}:{rabbitMqConfig.Port}", h =>
+        {
+            h.Username(rabbitMqConfig.Username);
+            h.Password(rabbitMqConfig.Password);
+        });
+
+        // Configure endpoint for consuming emails
+        cfg.ReceiveEndpoint("email-queue", e =>
+        {
+            e.ConfigureConsumer<SendEmailConsumer>(context);
+
+            // Retry policy: retry 3 times with incremental method
+            e.UseMessageRetry(r =>
+            {
+                r.Incremental(3, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(8));
+            });
+
+            // Concurrency limit
+            e.ConcurrentMessageLimit = 10;
+        });
+    });
+});
+
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -66,26 +117,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         });
     });
 
-builder.Services.AddSingleton<IConnectionFactory>(sp =>
-{
-    var configuration = sp.GetRequiredService<IConfiguration>();
-    return new ConnectionFactory
-    {
-        HostName = configuration["RabbitMQ:HostName"],
-        UserName = configuration["RabbitMQ:UserName"],
-        Password = configuration["RabbitMQ:Password"],
-        Port = int.Parse(configuration["RabbitMQ:Port"]),
-        VirtualHost = configuration["RabbitMQ:VirtualHost"],
-        AutomaticRecoveryEnabled = true,
-        NetworkRecoveryInterval = TimeSpan.FromSeconds(int.Parse(configuration["RabbitMQ:NetworkRecoveryIntervalSeconds"])),
-        RequestedConnectionTimeout = TimeSpan.FromSeconds(int.Parse(configuration["RabbitMQ:RequestedConnectionTimeoutSeconds"])),
-        SocketReadTimeout = TimeSpan.FromSeconds(int.Parse(configuration["RabbitMQ:SocketReadTimeoutSeconds"])),
-        SocketWriteTimeout = TimeSpan.FromSeconds(int.Parse(configuration["RabbitMQ:SocketWriteTimeoutSeconds"])),
-        ContinuationTimeout = TimeSpan.FromSeconds(int.Parse(configuration["RabbitMQ:ContinuationTimeoutSeconds"])),
-        TopologyRecoveryEnabled = true,
-        ClientProvidedName = "RecruitmentProcessManagementSystem"
-    };
-});
 
 var app = builder.Build();
 

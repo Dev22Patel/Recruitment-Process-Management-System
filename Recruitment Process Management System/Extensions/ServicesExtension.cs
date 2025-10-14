@@ -6,6 +6,7 @@ using Recruitment_Process_Management_System.Repositories.Implementations;
 using Recruitment_Process_Management_System.Repositories.Interfaces;
 using Recruitment_Process_Management_System.Services;
 using Recruitment_Process_Management_System.Services.CloudinaryService;
+using Recruitment_Process_Management_System.Services.RabbitMq;
 using System.Text;
 
 namespace Recruitment_Process_Management_System.Extensions
@@ -36,7 +37,7 @@ namespace Recruitment_Process_Management_System.Extensions
             services.AddScoped<EmailService>();
             services.AddScoped<JobPositionService>();
             services.AddScoped<ICloudinaryService, CloudinaryService>();
-
+            services.AddScoped<IRabbitMqService, RabbitMqService>();
             return services;
         }
     }
