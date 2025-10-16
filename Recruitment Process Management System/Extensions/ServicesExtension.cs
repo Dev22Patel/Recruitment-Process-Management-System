@@ -33,11 +33,12 @@ namespace Recruitment_Process_Management_System.Extensions
             // Register services with their interfaces
             services.AddScoped<SkillService>();
             services.AddScoped<AuthService>();
-            services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<EmailService>();
             services.AddScoped<JobPositionService>();
             services.AddScoped<ICloudinaryService, CloudinaryService>();
             services.AddScoped<IRabbitMqService, RabbitMqService>();
+            services.AddScoped<RoleService>();
+
             return services;
         }
     }

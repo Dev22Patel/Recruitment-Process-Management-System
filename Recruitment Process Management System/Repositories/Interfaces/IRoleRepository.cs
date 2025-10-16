@@ -6,7 +6,7 @@ namespace Recruitment_Process_Management_System.Repositories.Interfaces
     {
         Task<Role?> GetByNameAsync(string roleName);
         Task<Role> CreateAsync(Role role);
-        Task<List<string>> GetAllActiveRolesAsync();
+        Task<List<Role>> GetAllActiveRolesAsync();
 
 
     }

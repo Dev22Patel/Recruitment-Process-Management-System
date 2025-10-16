@@ -2,6 +2,8 @@
 using Recruitment_Process_Management_System.Data;
 using Recruitment_Process_Management_System.Models.Entities;
 using Recruitment_Process_Management_System.Repositories.Interfaces;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Recruitment_Process_Management_System.Repositories.Implementations
 {
@@ -14,18 +16,23 @@ namespace Recruitment_Process_Management_System.Repositories.Implementations
             _context = context;
         }
 
-        public async Task<List<string>> GetAllActiveRolesAsync()
+        public async Task<List<Role>> GetAllActiveRolesAsync()
         {
-            return await _context.Roles.Where(r => r.IsActive).Select(r => r.RoleName).ToListAsync();
+            return await _context.Roles
+                .Where(r => r.IsActive)
+                .Select(r => new Role
+                {
+                    Id = r.Id,
+                    RoleName = r.RoleName
+                })
+                .ToListAsync();
         }
-
 
         public async Task<Role?> GetByNameAsync(string roleName)
         {
             return await _context.Roles
                 .FirstOrDefaultAsync(r => r.RoleName == roleName.Trim());
         }
-
 
         public async Task<Role> CreateAsync(Role role)
         {

@@ -162,58 +162,49 @@ namespace Recruitment_Process_Management_System.Services
 
         private async Task<string> GenerateJwtTokenAsync(User user)
         {
-            try
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtSecret = _configuration["Jwt:Key"];
+            if (string.IsNullOrEmpty(jwtSecret))
+                throw new InvalidOperationException("JWT Secret is not configured");
+
+            var key = Encoding.ASCII.GetBytes(jwtSecret);
+
+            // Build claims — use ClaimTypes.Role (standard "role" mapping)
+            var claims = new List<Claim>
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var jwtSecret = _configuration["Jwt:Key"]; 
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+                new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}" ?? string.Empty)
+            };
 
-                if (string.IsNullOrEmpty(jwtSecret))
-                {
-                    throw new InvalidOperationException("JWT Secret is not configured in appsettings.json");
-                }
-
-                var key = Encoding.ASCII.GetBytes(jwtSecret);
-
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // Convert Guid to string
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
-                    new Claim("UserType", user.UserType)
-                };
-
-                // Only get roles for Employee users (simplified approach)
-                if (user.UserType == "Employee")
-                {
-                    var roles = await _userRoleRepository.GetRolesByUserIdAsync(user.Id);
-                    foreach (var role in roles)
-                    {
-                        claims.Add(new Claim(ClaimTypes.Role, role));
-                    }
-                }
-                else
-                {
-                    // For candidates, use UserType as role
-                    claims.Add(new Claim(ClaimTypes.Role, user.UserType));
-                }
-
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(claims),
-                    Expires = DateTime.UtcNow.AddDays(1),
-                    SigningCredentials = new SigningCredentials(
-                        new SymmetricSecurityKey(key),
-                        SecurityAlgorithms.HmacSha256Signature)
-                };
-
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-                return tokenHandler.WriteToken(token);
-            }
-            catch (Exception ex)
+            // Add roles: if employee, add multiple, else add single role
+            if (user.UserType == "Employee")
             {
-                throw new InvalidOperationException($"Token generation failed: {ex.Message}", ex);
+                var roles = await _userRoleRepository.GetRolesByUserIdAsync(user.Id);
+                foreach (var role in roles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+                }
             }
+            else
+            {
+                // Candidate or Admin user type
+                claims.Add(new Claim(ClaimTypes.Role, user.UserType));
+            }
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddDays(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Issuer = _configuration["Jwt:Issuer"],      
+                Audience = _configuration["Jwt:Audience"]  
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
+
     }
 }
 

@@ -9,6 +9,7 @@ namespace Recruitment_Process_Management_System.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles="Admin,HR")] // Only Admin and HR can manage job positions
     public class JobPositionsController : ControllerBase
     {
         private readonly JobPositionService _jobPositionService;

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Recruitment_Process_Management_System.Models.Entities;
 using Recruitment_Process_Management_System.Services;
@@ -7,6 +8,7 @@ namespace Recruitment_Process_Management_System.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class SkillController : ControllerBase
     {
         private readonly SkillService _skillService;
