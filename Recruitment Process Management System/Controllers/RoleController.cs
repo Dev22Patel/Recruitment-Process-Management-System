@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Recruitment_Process_Management_System.Controllers
 {
-    [Route("api/admin/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles = "Admin")]
     public class RoleController : ControllerBase
