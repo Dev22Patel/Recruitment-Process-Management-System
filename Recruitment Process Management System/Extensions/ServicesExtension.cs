@@ -30,6 +30,7 @@ namespace Recruitment_Process_Management_System.Extensions
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IJobPositionRepository, JobPositionRepository>();
             services.AddScoped<IAdminRepository, AdminRepository>();
+            services.AddScoped<IApplicationRepository, ApplicationRepository>();
 
             // Register services with their interfaces
             services.AddScoped<SkillService>();
@@ -40,6 +41,7 @@ namespace Recruitment_Process_Management_System.Extensions
             services.AddScoped<IRabbitMqService, RabbitMqService>();
             services.AddScoped<RoleService>();
             services.AddScoped<AdminService>();
+            services.AddScoped<ApplicationService>();
 
             return services;
         }

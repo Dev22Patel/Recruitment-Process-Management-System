@@ -24,6 +24,9 @@ namespace Recruitment_Process_Management_System.Data
         //public DbSet<JobPositionReviewer> JobPositionReviewers { get; set; }
         public DbSet<Status> Statuses { get; set; }
 
+
+        public DbSet<Application> Applications { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -167,6 +170,42 @@ namespace Recruitment_Process_Management_System.Data
                 new Status { Id = 7, EntityType = "Application", StatusName = "Selected", IsActive = true },
                 new Status { Id = 8, EntityType = "Application", StatusName = "Rejected", IsActive = true }
             );
+
+
+            // Application configuration
+            modelBuilder.Entity<Application>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                      .HasColumnType("uniqueidentifier")
+                      .HasDefaultValueSql("NEWID()");
+
+                entity.Property(e => e.CandidateId)
+                      .HasColumnType("uniqueidentifier");
+
+                entity.Property(e => e.JobPositionId)
+                      .HasColumnType("uniqueidentifier");
+
+                // Unique constraint - one candidate can only apply once per job
+                entity.HasIndex(e => new { e.CandidateId, e.JobPositionId })
+                      .IsUnique();
+
+                entity.HasOne(a => a.Candidate)
+                      .WithMany()
+                      .HasForeignKey(a => a.CandidateId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(a => a.JobPosition)
+                      .WithMany()
+                      .HasForeignKey(a => a.JobPositionId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(a => a.Status)
+                      .WithMany()
+                      .HasForeignKey(a => a.StatusId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
         }
     }
 }
