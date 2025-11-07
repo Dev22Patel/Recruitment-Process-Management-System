@@ -42,6 +42,7 @@ namespace Recruitment_Process_Management_System.Extensions
             services.AddScoped<RoleService>();
             services.AddScoped<AdminService>();
             services.AddScoped<ApplicationService>();
+            services.AddScoped<JobService>();
 
             return services;
         }

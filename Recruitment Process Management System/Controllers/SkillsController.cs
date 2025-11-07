@@ -8,7 +8,6 @@ namespace Recruitment_Process_Management_System.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
     public class SkillController : ControllerBase
     {
         private readonly SkillService _skillService;
@@ -18,6 +17,7 @@ namespace Recruitment_Process_Management_System.Controllers
             _skillService = skillService ?? throw new ArgumentNullException(nameof(skillService));
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateSkill([FromBody] Skill skill)
         {
@@ -46,6 +46,7 @@ namespace Recruitment_Process_Management_System.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin , Candidate")]
         public async Task<IActionResult> GetSkillById(Guid id)
         {
             try
@@ -64,6 +65,7 @@ namespace Recruitment_Process_Management_System.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Candidate , Admin")]
         public async Task<IActionResult> GetAllSkills()
         {
             try
@@ -78,6 +80,7 @@ namespace Recruitment_Process_Management_System.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateSkill(Guid id, [FromBody] Skill skill)
         {
             try
@@ -105,6 +108,7 @@ namespace Recruitment_Process_Management_System.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteSkill(Guid id)
         {
             try
@@ -123,6 +127,7 @@ namespace Recruitment_Process_Management_System.Controllers
         }
 
         [HttpPatch("{id}/deactivate")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeactivateSkill(Guid id)
         {
             try

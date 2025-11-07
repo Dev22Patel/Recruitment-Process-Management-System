@@ -159,31 +159,6 @@ namespace Recruitment_Process_Management_System.Controllers
         }
 
 
-        // GET: api/Application/check-eligibility/{jobId}
-        [HttpGet("check-eligibility/{jobId}")]
-        [Authorize(Roles = "Candidate")]
-        public async Task<IActionResult> CheckEligibility(Guid jobId)
-        {
-            var userId = GetCurrentUserId();
-            if (userId == Guid.Empty)
-                return Unauthorized(new { message = "Invalid user token" });
-
-            var result = await _applicationService.CheckEligibilityAsync(userId, jobId);
-            if (!result.IsEligible && !string.IsNullOrEmpty(result.Message))
-                return BadRequest(new { message = result.Message });
-
-            return Ok(new
-            {
-                isEligible = result.IsEligible,
-                skillMatchPercentage = result.SkillMatchPercentage,
-                matchedRequiredSkills = result.MatchedRequiredSkills,
-                totalRequiredSkills = result.TotalRequiredSkills,
-                matchedPreferredSkills = result.MatchedPreferredSkills,
-                totalPreferredSkills = result.TotalPreferredSkills
-            });
-        }
-
-
         // Helper method to get current user ID from JWT token
         private Guid GetCurrentUserId()
         {
