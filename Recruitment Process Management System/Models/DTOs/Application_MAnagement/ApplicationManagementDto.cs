@@ -89,4 +89,15 @@ namespace Recruitment_Process_Management_System.Models.DTOs.Application_Manageme
         public string? CurrentStatus { get; set; }
         public string? StatusReason { get; set; }
     }
+
+    public class EligibilityCheckResult
+    {
+        public bool IsEligible { get; set; }
+        public string? Message { get; set; }
+        public int SkillMatchPercentage { get; set; }
+        public int MatchedRequiredSkills { get; set; }
+        public int TotalRequiredSkills { get; set; }
+        public int MatchedPreferredSkills { get; set; }
+        public int TotalPreferredSkills { get; set; }
+    }
 }
