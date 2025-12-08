@@ -25,6 +25,14 @@ namespace Recruitment_Process_Management_System.Data
         public DbSet<Status> Statuses { get; set; }
 
 
+        //interview related
+        public DbSet<InterviewRound> InterviewRounds { get; set; }
+        public DbSet<InterviewParticipant> InterviewParticipants { get; set; }
+        public DbSet<InterviewFeedback> InterviewFeedbacks { get; set; }
+
+
+
+
         public DbSet<Application> Applications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -168,7 +176,13 @@ namespace Recruitment_Process_Management_System.Data
                 new Status { Id = 5, EntityType = "Application", StatusName = "Screening", IsActive = true },
                 new Status { Id = 6, EntityType = "Application", StatusName = "Interview", IsActive = true },
                 new Status { Id = 7, EntityType = "Application", StatusName = "Selected", IsActive = true },
-                new Status { Id = 8, EntityType = "Application", StatusName = "Rejected", IsActive = true }
+                new Status { Id = 8, EntityType = "Application", StatusName = "Rejected", IsActive = true },
+                new Status { Id = 9, EntityType = "Interview", StatusName = "Scheduled", IsActive = true },
+                new Status { Id = 10, EntityType = "Interview", StatusName = "Completed", IsActive = true },
+                new Status { Id = 11, EntityType = "Interview", StatusName = "Cancelled", IsActive = true },
+                new Status { Id = 12, EntityType = "Attendance", StatusName = "Present", IsActive = true },
+                new Status { Id = 13, EntityType = "Attendance", StatusName = "Absent", IsActive = true },
+                new Status { Id = 14, EntityType = "Attendance", StatusName = "Pending", IsActive = true }
             );
 
 
@@ -206,6 +220,106 @@ namespace Recruitment_Process_Management_System.Data
                       .HasForeignKey(a => a.StatusId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
+
+            // InterviewRound configuration
+            modelBuilder.Entity<InterviewRound>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                      .HasColumnType("uniqueidentifier")
+                      .HasDefaultValueSql("NEWID()");
+
+                entity.Property(e => e.ApplicationId)
+                      .HasColumnType("uniqueidentifier");
+
+                entity.Property(e => e.CreatedBy)
+                      .HasColumnType("uniqueidentifier")
+                      .IsRequired(false);
+
+                entity.HasIndex(e => new { e.ApplicationId, e.RoundNumber })
+                      .IsUnique();
+
+                entity.HasOne(ir => ir.Application)
+                      .WithMany()
+                      .HasForeignKey(ir => ir.ApplicationId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ir => ir.Status)
+                      .WithMany()
+                      .HasForeignKey(ir => ir.StatusId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(ir => ir.Creator)
+                      .WithMany()
+                      .HasForeignKey(ir => ir.CreatedBy)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // InterviewParticipant configuration
+            modelBuilder.Entity<InterviewParticipant>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                      .HasColumnType("uniqueidentifier")
+                      .HasDefaultValueSql("NEWID()");
+
+                entity.Property(e => e.InterviewRoundId)
+                      .HasColumnType("uniqueidentifier");
+
+                entity.Property(e => e.UserId)
+                      .HasColumnType("uniqueidentifier");
+
+                entity.HasIndex(e => new { e.InterviewRoundId, e.UserId })
+                      .IsUnique();
+
+                entity.HasOne(ip => ip.InterviewRound)
+                      .WithMany(ir => ir.InterviewParticipants)
+                      .HasForeignKey(ip => ip.InterviewRoundId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ip => ip.User)
+                      .WithMany()
+                      .HasForeignKey(ip => ip.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(ip => ip.AttendanceStatus)
+                      .WithMany()
+                      .HasForeignKey(ip => ip.AttendanceStatusId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // InterviewFeedback configuration
+            modelBuilder.Entity<InterviewFeedback>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                      .HasColumnType("uniqueidentifier")
+                      .HasDefaultValueSql("NEWID()");
+
+                entity.Property(e => e.InterviewRoundId)
+                      .HasColumnType("uniqueidentifier");
+
+                entity.Property(e => e.InterviewerId)
+                      .HasColumnType("uniqueidentifier");
+
+                entity.HasIndex(e => new { e.InterviewRoundId, e.InterviewerId })
+                      .IsUnique();
+
+                entity.HasOne(f => f.InterviewRound)
+                      .WithMany(ir => ir.InterviewFeedbacks)
+                      .HasForeignKey(f => f.InterviewRoundId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(f => f.Interviewer)
+                      .WithMany()
+                      .HasForeignKey(f => f.InterviewerId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+
         }
     }
 }
