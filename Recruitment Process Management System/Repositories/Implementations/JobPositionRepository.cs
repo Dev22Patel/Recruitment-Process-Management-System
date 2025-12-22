@@ -92,6 +92,34 @@ namespace Recruitment_Process_Management_System.Repositories.Implementations
             await _context.SaveChangesAsync();
         }
 
+        public async Task<List<Guid>> GetJobPositionIdsByReviewerAsync(Guid reviewerId)
+        {
+            return await _context.JobPositionReviewers
+                .Where(jpr => jpr.ReviewerId == reviewerId)
+                .Select(jpr => jpr.JobPositionId)
+                .Distinct()
+                .ToListAsync();
+        }
+
+        public async Task<List<JobSkillRequirement>> GetJobSkillRequirementsAsync(Guid jobPositionId)
+        {
+            return await _context.JobSkillRequirements
+                .Include(jsr => jsr.Skill)
+                .Where(jsr => jsr.JobPositionId == jobPositionId)
+                .ToListAsync();
+        }
+
+
+        public async Task<JobPosition?> GetJobPositionByIdAsync(Guid id)
+        {
+            return await _context.JobPositions
+                .Include(j => j.Creator)
+                .Include(j => j.Status)
+                .Include(j => j.JobSkillRequirements)
+                    .ThenInclude(jsr => jsr.Skill)
+                .FirstOrDefaultAsync(j => j.Id == id);
+        }
+
         //public async Task AddReviewersAsync(List<JobPositionReviewer> reviewers)
         //{
         //    _context.JobPositionReviewers.AddRange(reviewers);

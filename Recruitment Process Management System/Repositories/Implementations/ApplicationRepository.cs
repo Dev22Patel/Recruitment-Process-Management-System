@@ -131,5 +131,17 @@ namespace Recruitment_Process_Management_System.Repositories.Implementations
             return await _context.Applications
                 .CountAsync(a => a.CandidateId == candidateId);
         }
+
+        public async Task<List<Application>> GetApplicationsByStatusAndJobsAsync(int statusId, List<Guid> jobPositionIds)
+        {
+            return await _context.Applications
+                .Include(a => a.Candidate)
+                    .ThenInclude(c => c.User)
+                .Include(a => a.JobPosition)
+                .Include(a => a.Status)
+                .Where(a => a.StatusId == statusId && jobPositionIds.Contains(a.JobPositionId))
+                .OrderBy(a => a.ApplicationDate)
+                .ToListAsync();
+        }
     }
 }

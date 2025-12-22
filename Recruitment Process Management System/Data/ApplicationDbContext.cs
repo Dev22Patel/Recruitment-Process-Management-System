@@ -35,6 +35,19 @@ namespace Recruitment_Process_Management_System.Data
 
         public DbSet<Application> Applications { get; set; }
 
+
+        public DbSet<ScreeningReview> ScreeningReviews { get; set; }
+        public DbSet<JobPositionReviewer> JobPositionReviewers { get; set; }
+        public DbSet<ReviewerSkillVerification> ReviewerSkillVerifications { get; set; }
+
+
+
+
+
+
+
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -182,7 +195,11 @@ namespace Recruitment_Process_Management_System.Data
                 new Status { Id = 11, EntityType = "Interview", StatusName = "Cancelled", IsActive = true },
                 new Status { Id = 12, EntityType = "Attendance", StatusName = "Present", IsActive = true },
                 new Status { Id = 13, EntityType = "Attendance", StatusName = "Absent", IsActive = true },
-                new Status { Id = 14, EntityType = "Attendance", StatusName = "Pending", IsActive = true }
+                new Status { Id = 14, EntityType = "Attendance", StatusName = "Pending", IsActive = true },
+                new Status { Id = 15, EntityType = "Screening", StatusName = "Pending Review", IsActive = true },
+                new Status { Id = 16, EntityType = "Screening", StatusName = "Approved", IsActive = true },
+                new Status { Id = 17, EntityType = "Screening", StatusName = "Rejected", IsActive = true },
+                new Status { Id = 18, EntityType = "Screening", StatusName = "Needs Clarification", IsActive = true }
             );
 
 
@@ -317,6 +334,94 @@ namespace Recruitment_Process_Management_System.Data
                       .WithMany()
                       .HasForeignKey(f => f.InterviewerId)
                       .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<JobPositionReviewer>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.AssignedBy)
+                    .IsRequired(); // Explicitly mark as required
+
+                entity.Property(e => e.ReviewerId)
+                    .IsRequired();
+
+                entity.Property(e => e.JobPositionId)
+                    .IsRequired();
+
+                entity.Property(e => e.AssignedAt)
+                    .IsRequired();
+
+                entity.Property(e => e.IsActive)
+                    .IsRequired()
+                    .HasDefaultValue(true);
+
+                // Navigation properties
+                entity.HasOne(e => e.JobPosition)
+                    .WithMany()
+                    .HasForeignKey(e => e.JobPositionId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Reviewer)
+                    .WithMany()
+                    .HasForeignKey(e => e.ReviewerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Assigner)
+                    .WithMany()
+                    .HasForeignKey(e => e.AssignedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ScreeningReview configuration
+            modelBuilder.Entity<ScreeningReview>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.ApplicationId).IsRequired();
+                entity.Property(e => e.ReviewedBy).IsRequired();
+                entity.Property(e => e.ReviewDate).IsRequired();
+                entity.Property(e => e.StatusId).IsRequired();
+
+                entity.HasOne(e => e.Application)
+                    .WithMany()
+                    .HasForeignKey(e => e.ApplicationId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Reviewer)
+                    .WithMany()
+                    .HasForeignKey(e => e.ReviewedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Status)
+                    .WithMany()
+                    .HasForeignKey(e => e.StatusId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ReviewerSkillVerification configuration
+            modelBuilder.Entity<ReviewerSkillVerification>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.ScreeningReviewId).IsRequired();
+                entity.Property(e => e.CandidateSkillId).IsRequired();
+                entity.Property(e => e.VerifiedBy).IsRequired();
+
+                entity.HasOne(e => e.ScreeningReview)
+                    .WithMany(s => s.SkillVerifications)
+                    .HasForeignKey(e => e.ScreeningReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.CandidateSkill)
+                    .WithMany()
+                    .HasForeignKey(e => e.CandidateSkillId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Verifier)
+                    .WithMany()
+                    .HasForeignKey(e => e.VerifiedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
 

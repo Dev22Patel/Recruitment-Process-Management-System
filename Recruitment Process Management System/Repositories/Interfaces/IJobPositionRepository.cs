@@ -16,6 +16,11 @@ namespace Recruitment_Process_Management_System.Repositories.Interfaces
         Task AddSkillRequirementsAsync(List<JobSkillRequirement> requirements);
         Task RemoveSkillRequirementsAsync(Guid jobPositionId);
 
+        Task<List<Guid>> GetJobPositionIdsByReviewerAsync(Guid reviewerId);
+        Task<List<JobSkillRequirement>> GetJobSkillRequirementsAsync(Guid jobPositionId);
+
+        Task<JobPosition?> GetJobPositionByIdAsync(Guid id);
+
         //// Reviewers
         //Task AddReviewersAsync(List<JobPositionReviewer> reviewers);
         //Task RemoveReviewersAsync(Guid jobPositionId);

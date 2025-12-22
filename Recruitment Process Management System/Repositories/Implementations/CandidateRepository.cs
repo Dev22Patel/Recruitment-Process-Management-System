@@ -91,5 +91,24 @@ namespace Recruitment_Process_Management_System.Repositories.Implementations
             await _context.SaveChangesAsync();
             return true;
         }
+
+
+        public async Task<List<CandidateSkill>> GetSkillsByIdAsync(Guid candidateId)
+        {
+            return await _context.CandidateSkills
+                .Include(cs => cs.Skill)
+                .Where(cs => cs.CandidateId == candidateId)
+                .ToListAsync();
+        }
+
+        public async Task<Candidate?> GetCandidateByApplicationIdAsync(Guid applicationId)
+        {
+            var application = await _context.Applications
+                .Include(a => a.Candidate)
+                    .ThenInclude(c => c!.User)
+                .FirstOrDefaultAsync(a => a.Id == applicationId);
+
+            return application?.Candidate;
+        }
     }
 }

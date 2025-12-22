@@ -37,5 +37,12 @@ namespace Recruitment_Process_Management_System.Repositories.Implementations
             return await _context.Users
                 .AnyAsync(u => u.Email.ToLower() == email.ToLower());
         }
+
+        public async Task<User?> GetUserByIdAsync(Guid id)
+        {
+            return await _context.Users
+                .Include(u => u.UserRoles)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
     }
 }

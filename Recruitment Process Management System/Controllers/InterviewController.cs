@@ -8,7 +8,7 @@ namespace Recruitment_Process_Management_System.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin,Hr,Candidate,Employee,Recruiter")]
+    [Authorize(Roles = "Admin,Hr,Interviewer,Recruiter")]
     public class InterviewController : ControllerBase
     {
         private readonly InterviewService _interviewService;
@@ -26,6 +26,7 @@ namespace Recruitment_Process_Management_System.Controllers
 
         // POST: api/Interview/schedule
         [HttpPost("schedule")]
+        [Authorize(Roles = "Admin,Hr,")]
         public async Task<IActionResult> ScheduleInterview([FromBody] CreateInterviewRoundDto dto)
         {
             if (!ModelState.IsValid)

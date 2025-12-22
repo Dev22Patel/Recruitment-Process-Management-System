@@ -9,7 +9,7 @@ namespace Recruitment_Process_Management_System.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles= "Admin,HR,Interviewer,Recruiter")] // Only Admin and HR can manage job positions
+    [Authorize(Roles= "Admin,HR,Interviewer,Recruiter")] 
     public class JobPositionsController : ControllerBase
     {
         private readonly JobPositionService _jobPositionService;
@@ -21,6 +21,7 @@ namespace Recruitment_Process_Management_System.Controllers
 
         // POST: api/JobPositions
         [HttpPost]
+        [Authorize(Roles = "Recruiter,HR")]
         public async Task<ActionResult<JobPositionResponseDto>> CreateJobPosition([FromBody] CreateJobPositionDto dto)
         {
             try

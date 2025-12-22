@@ -437,7 +437,7 @@ namespace Recruitment_Process_Management_System.Services
             }
             catch
             {
-                // Log error but don't fail the operation
+                
             }
         }
     }

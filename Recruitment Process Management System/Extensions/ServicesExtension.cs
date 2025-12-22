@@ -34,6 +34,10 @@ namespace Recruitment_Process_Management_System.Extensions
             services.AddScoped<IInterviewFeedbackRepository,InterviewFeedbackRepository>();
             services.AddScoped<IInterviewParticipantRepository, InterviewParticipantRepository>();
             services.AddScoped<IInterviewRoundRepository, InterviewRoundRepository>();
+            services.AddScoped<IScreeningReviewRepository, ScreeningReviewRepository>();
+            services.AddScoped<IJobPositionReviewerRepository, JobPositionReviewerRepository>();
+            services.AddScoped<IReviewerSkillVerificationRepository, ReviewerSkillVerificationRepository>();
+
 
             // Register services with their interfaces
             services.AddScoped<SkillService>();
@@ -47,6 +51,8 @@ namespace Recruitment_Process_Management_System.Extensions
             services.AddScoped<ApplicationService>();
             services.AddScoped<JobService>();
             services.AddScoped<InterviewService>();
+            services.AddScoped<ScreeningService>();
+            services.AddScoped<JobPositionReviewerService>();
 
             return services;
         }
