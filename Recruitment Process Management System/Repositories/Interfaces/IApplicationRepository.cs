@@ -19,5 +19,8 @@ namespace Recruitment_Process_Management_System.Repositories.Interfaces
 
         Task<List<Application>> GetApplicationsByStatusAndJobsAsync(int statusId, List<Guid> jobPositionIds);
 
+        Task<Application?> GetByIdWithTrackingAsync(Guid id);
+        Task<List<Application>> GetApplicationsByIdsAsync(List<Guid> applicationIds);
+
     }
 }

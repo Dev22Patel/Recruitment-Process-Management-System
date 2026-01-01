@@ -26,7 +26,7 @@ namespace Recruitment_Process_Management_System.Controllers
 
         // POST: api/Interview/schedule
         [HttpPost("schedule")]
-        [Authorize(Roles = "Admin,Hr,")]
+        [Authorize(Roles = "Admin,Hr,Recruiter,Reviewer")]
         public async Task<IActionResult> ScheduleInterview([FromBody] CreateInterviewRoundDto dto)
         {
             if (!ModelState.IsValid)

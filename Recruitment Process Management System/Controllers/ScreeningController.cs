@@ -23,6 +23,7 @@ namespace Recruitment_Process_Management_System.Controllers
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             return Guid.TryParse(userIdClaim, out var userId) ? userId : Guid.Empty;
         }
+        
 
         // POST: api/Screening/create
         [HttpPost("create")]

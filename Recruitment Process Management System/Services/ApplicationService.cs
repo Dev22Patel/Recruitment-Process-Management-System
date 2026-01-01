@@ -14,6 +14,7 @@ namespace Recruitment_Process_Management_System.Services
         private readonly INotificationRepository _notificationRepository;
         private readonly EmailService _emailService;
         private readonly IUserRepository _userRepository;
+        private readonly IApplicationReviewerRepository _applicationReviewerRepository;
 
         public ApplicationService(
             IApplicationRepository applicationRepository,
@@ -21,7 +22,8 @@ namespace Recruitment_Process_Management_System.Services
             IJobPositionRepository jobPositionRepository,
             INotificationRepository notificationRepository,
             EmailService emailService,
-            IUserRepository userRepository
+            IUserRepository userRepository,
+            IApplicationReviewerRepository applicationReviewerRepository
         )
         {
             _applicationRepository = applicationRepository;
@@ -30,6 +32,7 @@ namespace Recruitment_Process_Management_System.Services
             _notificationRepository = notificationRepository;
             _emailService = emailService;
             _userRepository = userRepository;
+            _applicationReviewerRepository = applicationReviewerRepository;
         }
 
         public async Task<(bool Success, string Message, ApplicationResponseDto? Application)> CreateApplicationAsync(
@@ -102,6 +105,7 @@ namespace Recruitment_Process_Management_System.Services
             var applications = await _applicationRepository.GetByCandidateIdAsync(candidate.Id);
             return applications.Select(a => a.JobPositionId).ToList();
         }
+
         public async Task<List<ApplicationResponseDto>> GetAllApplicationsAsync()
         {
             var applications = await _applicationRepository.GetAllAsync();
@@ -136,16 +140,25 @@ namespace Recruitment_Process_Management_System.Services
         public async Task<(bool Success, string Message)> UpdateApplicationStatusAsync(
             UpdateApplicationStatusDto dto, Guid updatedBy)
         {
-            var application = await _applicationRepository.GetByIdAsync(dto.ApplicationId);
+            var application = await _applicationRepository.GetByIdWithTrackingAsync(dto.ApplicationId);
             if (application == null)
             {
                 return (false, "Application not found");
             }
 
+            // Store the old status to check if we're moving to screening
+            var oldStatusId = application.StatusId;
+
             application.StatusId = dto.StatusId;
             application.StatusReason = dto.StatusReason;
 
             await _applicationRepository.UpdateAsync(application);
+
+            // If status changed from "Applied" (4) to "Screening" (5), assign a reviewer
+            if (oldStatusId == 4 && dto.StatusId == 5)
+            {
+                await AssignReviewerToApplicationAsync(application.Id);
+            }
 
             // Create notification for candidate
             await CreateStatusUpdateNotificationAsync(application, updatedBy);
@@ -201,6 +214,79 @@ namespace Recruitment_Process_Management_System.Services
             return true;
         }
 
+        private async Task AssignReviewerToApplicationAsync(Guid applicationId)
+        {
+            try
+            {
+                // Check if reviewer is already assigned
+                var existingAssignment = await _applicationReviewerRepository.GetByApplicationIdAsync(applicationId);
+                if (existingAssignment != null)
+                {
+                    return; // Already assigned
+                }
+
+                // Get all users with Reviewer role
+                var reviewers = await _userRepository.GetUsersByRoleAsync("Reviewer");
+
+                if (reviewers == null || !reviewers.Any())
+                {
+                    // No reviewers available, log this
+                    // TODO: Log warning - no reviewers available
+                    return;
+                }
+
+                // Load balance: Find reviewer with least workload
+                Guid selectedReviewerId = Guid.Empty;
+                int minWorkload = int.MaxValue;
+
+                foreach (var reviewer in reviewers) // 'reviewer' is the loop variable
+                {
+                    // Just use 'reviewer' directly - don't redeclare it
+                    var workload = await _applicationReviewerRepository.GetReviewerWorkloadAsync(reviewer.Id);
+                    if (workload < minWorkload)
+                    {
+                        minWorkload = workload;
+                        selectedReviewerId = reviewer.Id;
+                    }
+                }
+
+                // If no reviewer found (shouldn't happen), pick random
+                if (selectedReviewerId == Guid.Empty)
+                {
+                    var random = new Random();
+                    var randomReviewer = reviewers[random.Next(reviewers.Count)];
+                    selectedReviewerId = randomReviewer.Id;
+                }
+
+                // Create assignment
+                var assignment = new ApplicationReviewer
+                {
+                    ApplicationId = applicationId,
+                    ReviewerId = selectedReviewerId,
+                    IsActive = true
+                };
+
+                await _applicationReviewerRepository.CreateAsync(assignment);
+
+                // Send notification to assigned reviewer
+                var application = await _applicationRepository.GetByIdAsync(applicationId);
+                var assignedReviewer = await _userRepository.GetByIdAsync(selectedReviewerId);
+
+                if (application != null && assignedReviewer != null)
+                {
+                    await _emailService.QueueEmailAsync(
+                        assignedReviewer.Email,
+                        "New Application Assigned for Screening",
+                        $"Dear {assignedReviewer.FirstName}, a new application from {application.Candidate?.User?.FirstName} {application.Candidate?.User?.LastName} for {application.JobPosition?.Title} has been assigned to you for screening."
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail the status update
+                // TODO: Log exception
+            }
+        }
         // Helper methods
         private ApplicationResponseDto MapToResponseDto(Application application)
         {
@@ -221,8 +307,8 @@ namespace Recruitment_Process_Management_System.Services
             {
                 Id = application.Id,
                 CandidateId = application.CandidateId,
-                CandidateName = application.Candidate?.User != null 
-                    ? $"{application.Candidate.User.FirstName} {application.Candidate.User.LastName}" 
+                CandidateName = application.Candidate?.User != null
+                    ? $"{application.Candidate.User.FirstName} {application.Candidate.User.LastName}"
                     : null,
                 CandidateEmail = application.Candidate?.User?.Email,
                 JobPositionId = application.JobPositionId,
@@ -249,28 +335,18 @@ namespace Recruitment_Process_Management_System.Services
         {
             try
             {
-
                 var createdByUser = await _userRepository.GetByIdAsync(jobPosition.CreatedBy);
 
-
-                //we can give in app notification also so for that purpose i have created this below notification object
-
-                //var notification = new Notification
-                //{
-                //    UserId = jobPosition.CreatedBy,
-                //    Title = "New Job Application",
-                //    Message = $"{candidate.User?.FirstName} {candidate.User?.LastName} has applied for {jobPosition.Title}",
-                //    RelatedEntityType = "Application",
-                //    RelatedEntityId = application.Id,
-                //    CreatedAt = DateTime.UtcNow
-                //};
+                if (createdByUser == null)
+                {
+                    return; // Skip notification if creator not found
+                }
 
                 await _emailService.QueueEmailAsync(
-                    createdByUser.Email, 
+                    createdByUser.Email,
                     "New Job Application",
                     $"{candidate.User?.FirstName} {candidate.User?.LastName} has applied for {jobPosition.Title}"
                 );
-
             }
             catch
             {
@@ -284,18 +360,6 @@ namespace Recruitment_Process_Management_System.Services
             {
                 if (application.Candidate?.UserId == null)
                     return;
-
-                //we can give in app notification also so for that purpose i have created this below notification object
-
-                //var notification = new Notification
-                //{
-                //    UserId = application.Candidate.UserId,
-                //    Title = "Application Status Updated",
-                //    Message = $"Your application for {application.JobPosition?.Title} has been updated to {application.Status?.StatusName}",
-                //    RelatedEntityType = "Application",
-                //    RelatedEntityId = application.Id,
-                //    CreatedAt = DateTime.UtcNow
-                //};
 
                 var candidateUser = await _userRepository.GetByIdAsync(application.Candidate.UserId);
 
@@ -313,8 +377,5 @@ namespace Recruitment_Process_Management_System.Services
                 // TODO: log ex (avoid swallowing errors silently)
             }
         }
-
-
-        
     }
 }

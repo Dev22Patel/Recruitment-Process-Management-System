@@ -9,5 +9,6 @@ namespace Recruitment_Process_Management_System.Repositories.Interfaces
         Task<User> CreateAsync(User user);
         Task<bool> EmailExistsAsync(string email);
         Task<User?> GetUserByIdAsync(Guid id);
+        Task<List<User>> GetUsersByRoleAsync(string roleName);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Recruitment_Process_Management_System.Models.DTOs;
 using Recruitment_Process_Management_System.Models.Entities;
+using Recruitment_Process_Management_System.Repositories.Implementations;
 using Recruitment_Process_Management_System.Repositories.Interfaces;
 
 namespace Recruitment_Process_Management_System.Services
@@ -12,6 +13,7 @@ namespace Recruitment_Process_Management_System.Services
         private readonly ICandidateRepository _candidateRepository;
         private readonly IJobPositionRepository _jobPositionRepository;
         private readonly INotificationRepository _notificationRepository;
+        private readonly IApplicationReviewerRepository _applicationReviewerRepository;
 
         public ScreeningService(
             IScreeningReviewRepository screeningReviewRepository,
@@ -19,7 +21,8 @@ namespace Recruitment_Process_Management_System.Services
             IApplicationRepository applicationRepository,
             ICandidateRepository candidateRepository,
             IJobPositionRepository jobPositionRepository,
-            INotificationRepository notificationRepository)
+            INotificationRepository notificationRepository,
+            IApplicationReviewerRepository applicationReviewerRepository)
         {
             _screeningReviewRepository = screeningReviewRepository;
             _skillVerificationRepository = skillVerificationRepository;
@@ -27,6 +30,7 @@ namespace Recruitment_Process_Management_System.Services
             _candidateRepository = candidateRepository;
             _jobPositionRepository = jobPositionRepository;
             _notificationRepository = notificationRepository;
+            _applicationReviewerRepository = applicationReviewerRepository;
         }
 
         public async Task<(bool Success, string Message, ScreeningReviewResponseDto? ScreeningReview)> CreateScreeningReviewAsync(
@@ -201,15 +205,26 @@ namespace Recruitment_Process_Management_System.Services
         {
             try
             {
-                // Get job positions assigned to this reviewer
-                var assignedJobIds = await _jobPositionRepository.GetJobPositionIdsByReviewerAsync(reviewerId);
+                // NEW LOGIC - Get applications assigned to this reviewer
+                var reviewerAssignments = await _applicationReviewerRepository.GetByReviewerIdAsync(reviewerId);
 
-                // Get applications in screening status (StatusId = 5) for these jobs
-                var applications = await _applicationRepository.GetApplicationsByStatusAndJobsAsync(5, assignedJobIds);
+                // Get application IDs assigned to this reviewer
+                var assignedApplicationIds = reviewerAssignments
+                    .Where(ar => ar.IsActive)
+                    .Select(ar => ar.ApplicationId)
+                    .ToList();
 
-                // Filter out applications that already have a screening review
+                if (!assignedApplicationIds.Any())
+                {
+                    return new List<PendingScreeningResponseDto>();
+                }
+
+                // Get these applications if they're still in screening status
+                var applications = await _applicationRepository.GetApplicationsByIdsAsync(assignedApplicationIds);
+
+                // Filter only screening status (5) and not yet reviewed
                 var pendingApplications = new List<Application>();
-                foreach (var app in applications)
+                foreach (var app in applications.Where(a => a.StatusId == 5))
                 {
                     var existingReview = await _screeningReviewRepository.GetScreeningReviewByApplicationIdAsync(app.Id);
                     if (existingReview == null)
@@ -226,7 +241,6 @@ namespace Recruitment_Process_Management_System.Services
                     var jobPosition = await _jobPositionRepository.GetByIdAsync(app.JobPositionId);
                     var candidateSkills = await _candidateRepository.GetSkillsByIdAsync(app.CandidateId);
                     var jobSkillRequirements = await _jobPositionRepository.GetJobSkillRequirementsAsync(app.JobPositionId);
-
 
                     // Calculate matching skills
                     var matchingSkills = candidateSkills
@@ -263,7 +277,6 @@ namespace Recruitment_Process_Management_System.Services
                 throw new Exception($"Error getting pending screenings: {ex.Message}");
             }
         }
-
         public async Task<List<ScreeningReviewResponseDto>> GetScreeningsByApplicationAsync(Guid applicationId)
         {
             var reviews = await _screeningReviewRepository.GetScreeningReviewsByApplicationAsync(applicationId);

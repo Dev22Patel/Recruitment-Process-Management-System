@@ -37,7 +37,7 @@ namespace Recruitment_Process_Management_System.Extensions
             services.AddScoped<IScreeningReviewRepository, ScreeningReviewRepository>();
             services.AddScoped<IJobPositionReviewerRepository, JobPositionReviewerRepository>();
             services.AddScoped<IReviewerSkillVerificationRepository, ReviewerSkillVerificationRepository>();
-
+            services.AddScoped<IApplicationReviewerRepository, ApplicationReviewerRepository>();
 
             // Register services with their interfaces
             services.AddScoped<SkillService>();

@@ -42,6 +42,8 @@ namespace Recruitment_Process_Management_System.Data
 
 
 
+        public DbSet<ApplicationReviewer> ApplicationReviewers { get; set; }
+
 
 
 
@@ -424,7 +426,36 @@ namespace Recruitment_Process_Management_System.Data
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
+            modelBuilder.Entity<ApplicationReviewer>(entity =>
+            {
+                entity.HasKey(ar => ar.Id);
 
+                entity.HasOne(ar => ar.Application)
+                    .WithMany()
+                    .HasForeignKey(ar => ar.ApplicationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ar => ar.Reviewer)
+                    .WithMany()
+                    .HasForeignKey(ar => ar.ReviewerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(ar => ar.ApplicationId);
+                entity.HasIndex(ar => ar.ReviewerId);
+            });
+
+            // Fix decimal warnings while we're at it
+            modelBuilder.Entity<ReviewerSkillVerification>(entity =>
+            {
+                entity.Property(rsv => rsv.VerifiedYearsOfExperience)
+                    .HasPrecision(5, 2);
+            });
+
+            modelBuilder.Entity<ScreeningReview>(entity =>
+            {
+                entity.Property(sr => sr.Rating)
+                    .HasPrecision(3, 2);
+            });
         }
     }
 }

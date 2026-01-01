@@ -44,5 +44,15 @@ namespace Recruitment_Process_Management_System.Repositories.Implementations
                 .Include(u => u.UserRoles)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
+
+        public async Task<List<User>> GetUsersByRoleAsync(string roleName)
+        {
+            return await _context.Users
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .Where(u => u.UserRoles.Any(ur => ur.Role!.RoleName == roleName))
+                .ToListAsync();
+        }
+
     }
 }

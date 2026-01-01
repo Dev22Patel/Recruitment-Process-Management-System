@@ -40,6 +40,20 @@ namespace Recruitment_Process_Management_System.Repositories.Implementations
                 .Include(a => a.Status)
                 .FirstOrDefaultAsync(a => a.Id == id);
         }
+        public async Task<List<Application>> GetApplicationsByIdsAsync(List<Guid> applicationIds)
+        {
+            return await _context.Applications
+                .Include(a => a.Candidate)
+                    .ThenInclude(c => c!.User)
+                .Include(a => a.Candidate)
+                    .ThenInclude(c => c!.CandidateSkills)
+                        .ThenInclude(cs => cs.Skill)
+                .Include(a => a.JobPosition)
+                .Include(a => a.Status)
+                .Where(a => applicationIds.Contains(a.Id))
+                .OrderByDescending(a => a.ApplicationDate)
+                .ToListAsync();
+        }
 
         public async Task<List<Application>> GetAllAsync()
         {
@@ -142,6 +156,16 @@ namespace Recruitment_Process_Management_System.Repositories.Implementations
                 .Where(a => a.StatusId == statusId && jobPositionIds.Contains(a.JobPositionId))
                 .OrderBy(a => a.ApplicationDate)
                 .ToListAsync();
+        }
+
+        public async Task<Application?> GetByIdWithTrackingAsync(Guid id)
+        {
+            return await _context.Applications
+                .Include(a => a.Candidate)
+                    .ThenInclude(c => c!.User)
+                .Include(a => a.JobPosition)
+                .Include(a => a.Status)
+                .FirstOrDefaultAsync(a => a.Id == id);
         }
     }
 }
