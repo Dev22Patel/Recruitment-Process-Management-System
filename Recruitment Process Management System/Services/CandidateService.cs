@@ -93,21 +93,28 @@ namespace Recruitment_Process_Management_System.Services
 
         public bool ValidateProfileCompletion(Candidate candidate)
         {
-            // Define minimum required fields for a complete profile
-            var requiredFieldsComplete = !string.IsNullOrWhiteSpace(candidate.CurrentLocation) &&
-                                        candidate.TotalExperience.HasValue &&
-                                        !string.IsNullOrWhiteSpace(candidate.CurrentCompany) &&
-                                        candidate.CurrentSalary.HasValue &&
-                                        candidate.ExpectedSalary.HasValue &&
-                                        candidate.NoticePeriod.HasValue &&
-                                        !string.IsNullOrWhiteSpace(candidate.CollegeName) &&
-                                        candidate.GraduationYear.HasValue &&
-                                        !string.IsNullOrWhiteSpace(candidate.Degree);
+            // Checking  if candidate is a fresher (experience che ke nai or 0 experience che)  
+            bool isFresher = !candidate.TotalExperience.HasValue || candidate.TotalExperience == 0;
 
-            // Optionally, you can also check if at least one skill is added
-            var hasSkills = candidate.CandidateSkills?.Any() == true;
+            // Required fields for ALL candidates (both fresher and experienced)
+            bool basicFieldsComplete =
+                !string.IsNullOrWhiteSpace(candidate.CurrentLocation) &&
+                !string.IsNullOrWhiteSpace(candidate.CollegeName) &&
+                candidate.GraduationYear.HasValue &&
+                !string.IsNullOrWhiteSpace(candidate.Degree) &&
+                candidate.ExpectedSalary.HasValue;
 
-            return requiredFieldsComplete; // You can add && hasSkills if skills are mandatory
+            // For EXPERIENCED candidates, these additional fields are required
+            bool experienceFieldsComplete = true;
+            if (!isFresher)
+            {
+                experienceFieldsComplete =
+                    !string.IsNullOrWhiteSpace(candidate.CurrentCompany) &&
+                    candidate.CurrentSalary.HasValue &&
+                    candidate.NoticePeriod.HasValue;
+            }
+
+            return basicFieldsComplete && experienceFieldsComplete;
         }
     }
 }
