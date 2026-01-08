@@ -39,25 +39,7 @@ namespace Recruitment_Process_Management_System.Services
             if (existingApp != null)
                 return new EligibilityCheckResult { IsEligible = false, Message = "You have already applied for this position" };
 
-            // Experience validation
-            var candidateExperience = candidate.TotalExperience ?? 0;
-            var requiredExperience = jobPosition.MinExperience ?? 0;
-
-            if (candidateExperience < requiredExperience)
-            {
-                return new EligibilityCheckResult
-                {
-                    IsEligible = false,
-                    Message = $"Insufficient experience. Required: {requiredExperience}+ years, You have: {candidateExperience} years",
-                    SkillMatchPercentage = 0,
-                    MatchedRequiredSkills = 0,
-                    TotalRequiredSkills = 0,
-                    MatchedPreferredSkills = 0,
-                    TotalPreferredSkills = 0
-                };
-            }
-
-            // Skill matching logic
+            // ALWAYS calculate skill matching first (before experience check)
             var candidateSkills = candidate.CandidateSkills?
                 .Select(cs => cs.Skill?.SkillName?.ToLower().Trim())
                 .Where(s => !string.IsNullOrEmpty(s))
@@ -80,11 +62,28 @@ namespace Recruitment_Process_Management_System.Services
                 ? (int)Math.Round((double)matchedRequired / requiredSkills.Count * 100)
                 : 100;
 
-            // Check if eligible based on skill match (70% threshold)
-            var isEligible = requiredSkills.Count == 0 || skillMatchPercentage >= 70;
+            var candidateExperience = candidate.TotalExperience ?? 0;
+            var requiredExperience = jobPosition.MinExperience ?? 0;
+
+            if (candidateExperience < requiredExperience)
+            {
+                return new EligibilityCheckResult
+                {
+                    IsEligible = false,
+                    Message = $"Insufficient experience. Required: {requiredExperience}+ years, You have: {candidateExperience} years",
+                    SkillMatchPercentage = skillMatchPercentage,
+                    MatchedRequiredSkills = matchedRequired,
+                    TotalRequiredSkills = requiredSkills.Count,  
+                    MatchedPreferredSkills = matchedPreferred,
+                    TotalPreferredSkills = preferredSkills.Count
+                };
+            }
+
+            // Check if eligible based on skill match (60% threshold)
+            var isEligible = requiredSkills.Count == 0 || skillMatchPercentage >= 60;
 
             var message = !isEligible && requiredSkills.Count > 0
-                ? $"You need at least 70% match on required skills. Current: {skillMatchPercentage}%"
+                ? $"You need at least 60% match on required skills. Current: {skillMatchPercentage}%"
                 : null;
 
             return new EligibilityCheckResult
