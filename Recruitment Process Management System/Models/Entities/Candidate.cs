@@ -8,7 +8,7 @@ namespace Recruitment_Process_Management_System.Models.Entities
         public Guid Id { get; set; }
 
         [Required]
-        public Guid UserId { get; set; } // FIXED: Changed from int to Guid
+        public Guid UserId { get; set; }
 
         [MaxLength(100)]
         public string? CurrentLocation { get; set; }

@@ -65,5 +65,10 @@ namespace Recruitment_Process_Management_System.Repositories.Implementations
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<Skill?> GetByNameAsync(string name)
+        {
+            return await _context.Skills.FirstOrDefaultAsync(s => s.SkillName.ToLower() == name.ToLower());
+        }
     }
 }

@@ -45,6 +45,7 @@ namespace Recruitment_Process_Management_System.Data
         public DbSet<ApplicationReviewer> ApplicationReviewers { get; set; }
 
 
+        public DbSet<BulkUpload> BulkUploads { get; set; }
 
 
 
@@ -201,7 +202,10 @@ namespace Recruitment_Process_Management_System.Data
                 new Status { Id = 15, EntityType = "Screening", StatusName = "Pending Review", IsActive = true },
                 new Status { Id = 16, EntityType = "Screening", StatusName = "Approved", IsActive = true },
                 new Status { Id = 17, EntityType = "Screening", StatusName = "Rejected", IsActive = true },
-                new Status { Id = 18, EntityType = "Screening", StatusName = "Needs Clarification", IsActive = true }
+                new Status { Id = 18, EntityType = "Screening", StatusName = "Needs Clarification", IsActive = true },
+                new Status { Id = 19, EntityType = "BulkUpload", StatusName = "Processing", IsActive = true },
+                new Status { Id = 20, EntityType = "BulkUpload", StatusName = "Completed", IsActive = true },
+                new Status { Id = 21, EntityType = "BulkUpload", StatusName = "Failed", IsActive = true }
             );
 
 
@@ -455,6 +459,30 @@ namespace Recruitment_Process_Management_System.Data
             {
                 entity.Property(sr => sr.Rating)
                     .HasPrecision(3, 2);
+            });
+
+
+
+            modelBuilder.Entity<BulkUpload>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                      .HasColumnType("uniqueidentifier")
+                      .HasDefaultValueSql("NEWID()");
+
+                entity.Property(e => e.UploadedBy)
+                      .HasColumnType("uniqueidentifier");
+
+                entity.HasOne(b => b.Status)
+                      .WithMany()
+                      .HasForeignKey(b => b.StatusId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(b => b.UploadedByUser)
+                      .WithMany()
+                      .HasForeignKey(b => b.UploadedBy)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

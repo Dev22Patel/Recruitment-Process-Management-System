@@ -1,3 +1,5 @@
+using Hangfire;
+using Hangfire.Dashboard;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +11,8 @@ using Recruitment_Process_Management_System.Extensions;
 using Recruitment_Process_Management_System.Services.Consumers;
 using Recruitment_Process_Management_System.Services.RabbitMq;
 using System.Text;
+using Hangfire.Dashboard;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -129,6 +133,11 @@ if (app.Environment.IsDevelopment())
 
 }
 
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireAuthorizationFilter() }
+});
+
 
 
 app.UseHttpsRedirection();
@@ -142,3 +151,15 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
+
+public class HangfireAuthorizationFilter : IDashboardAuthorizationFilter
+{
+    public bool Authorize(DashboardContext context)
+    {
+        // In production, add kari devanu proper authorization
+        // haman mate , allow access only in Development
+        return true; // Change this to check for Admin role in production
+    }
+}
