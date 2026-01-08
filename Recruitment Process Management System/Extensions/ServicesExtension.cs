@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Recruitment_Process_Management_System.Data;
@@ -38,6 +39,8 @@ namespace Recruitment_Process_Management_System.Extensions
             services.AddScoped<IJobPositionReviewerRepository, JobPositionReviewerRepository>();
             services.AddScoped<IReviewerSkillVerificationRepository, ReviewerSkillVerificationRepository>();
             services.AddScoped<IApplicationReviewerRepository, ApplicationReviewerRepository>();
+            services.AddScoped<IBulkUploadRepository, BulkUploadRepository>();
+
 
             // Register services with their interfaces
             services.AddScoped<SkillService>();
@@ -53,6 +56,21 @@ namespace Recruitment_Process_Management_System.Extensions
             services.AddScoped<InterviewService>();
             services.AddScoped<ScreeningService>();
             services.AddScoped<JobPositionReviewerService>();
+            services.AddScoped<ExcelParserService>();
+            services.AddScoped<BulkUploadService>();
+
+
+
+            services.AddHangfire(config => config
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseSqlServerStorage(configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddHangfireServer(options =>
+            {
+                options.WorkerCount = 2; // Number of parallel background workers
+            });
 
             return services;
         }

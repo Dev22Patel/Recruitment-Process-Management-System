@@ -9,5 +9,7 @@ namespace Recruitment_Process_Management_System.Repositories.Interfaces
         Task<List<Skill>> GetAllAsync();
         Task<Skill> UpdateAsync(Skill skill);
         Task<bool> DeleteAsync(Guid id);
+
+        Task<Skill?> GetByNameAsync(string name);
     }
 }
