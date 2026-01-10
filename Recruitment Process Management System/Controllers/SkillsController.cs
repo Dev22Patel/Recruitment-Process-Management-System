@@ -65,7 +65,7 @@ namespace Recruitment_Process_Management_System.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Candidate , Admin")]
+        [Authorize(Roles = "Candidate , Admin,Recruiter,Hr,Reviewer,Interviewer")]
         public async Task<IActionResult> GetAllSkills()
         {
             try
